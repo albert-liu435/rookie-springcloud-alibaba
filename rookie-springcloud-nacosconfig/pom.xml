@@ -15,7 +15,7 @@
     <modules>
 
         <module>rookie-nacosconfig-payment-provider</module>
-        <module>rookie-nacosconfig-order-consumer</module>
+        <!--<module>rookie-nacosconfig-order-consumer</module>-->
 
     </modules>
 
