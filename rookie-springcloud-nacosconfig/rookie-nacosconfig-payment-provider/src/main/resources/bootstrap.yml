@@ -1,0 +1,25 @@
+server:
+  port: 8001
+spring:
+  application:
+    name: rookie-nacos-payment-provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #配置Nacos服务配置中心的地址
+      config:
+        server-addr: localhost:8848 #Nacos作为配置中心地址
+        file-extension: yaml #指定yaml格式的配置
+        group: DEV_GROUP #TEST_GROUP #DEV_GROUP
+        #namespace: 3c58855e-716f-4f49-8860-d3744dec7eda
+
+
+# ${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}
+# nacos-config-client-dev.yaml
+
+# nacos-config-client-test.yaml   ----> config.info
+
+#rookie-nacos-payment-provider-dev.yaml
+
+#config:
+#  info: "config info for dev,from nacos config center"
