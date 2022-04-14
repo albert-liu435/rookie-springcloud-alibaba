@@ -245,11 +245,120 @@ Service就是微服务；一个Service可以包含多个Cluster（集群），Na
 
 ## Nacos集群和持久化配置
 
+[官网说明](https://nacos.io/zh-cn/docs/cluster-mode-quick-start.html)
 
+![img_7](.\pic\img_7.png)
 
+[参考地址](https://nacos.io/zh-cn/docs/deployment.html)
+
+### nacos持久化配置
+
+sql脚本位于nacos/conf下面，名称为nacos-mysql.sql
+
+需要配置conf下面的application.properties文件，添加数据库配置。如下
+
+```sql
+spring.datasource.platform=mysql
  
+db.num=1
+db.url.0=jdbc:mysql://127.0.0.1:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
+db.user=root
+db.password=123456
 
- 
+```
+
+### linux版nacos和mysql生产环境配置
+
+预计需要，1个Nginx+3个nacos注册中心+1个mysql
+
+#### 下载linux版本的nacos
+
+#### 集群配置步骤
+
+1、执行sql语句，sql语句在conf目录下
+
+2、配置application.properties，如下
+
+添加数据库连接信息
+
+spring.datasource.platform=mysql
+
+```yaml
+db.num=1
+db.url.0=jdbc:mysql://127.0.0.1:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
+db.user=root
+db.password=123456
+```
+
+3、配置conf下面的cluster.conf配置
+
+如本次是伪分布式，需要在cluster.conf下面添加如下三个地址和端口
+
+```java
+12.168.111.144:3333
+12.168.111.144:4444
+12.168.111.144:5555
+```
+
+4、编辑启动脚本startup.sh
+
+由于本次使用的是伪分布式，所以需要进行修改，如果非伪分布式不需要进行修改
+
+![1649923346](.\pic\1649923346.png)
+
+分别执行如下命令，启动三个实例
+
+```sh
+./sstartup.sh -p 3333
+./sstartup.sh -p 4444
+./sstartup.sh -p 5555
+```
+
+ 5、配置nginx
+
+![1649923508](.\pic\1649923508.png)
+
+启动命令
+
+```java
+./nginx -c /usr/local/nginx/conf/nginx.conf
+```
+
+6、访问nacos
+
+通过nginx访问nacos
+
+http://192.168.111.144:1111/nacos/#/login
+
+此时微服务客户端yml文件配置可以更改为nginx的地址
+
+```yaml
+server:
+  port: 9002
+
+spring:
+  application:
+    name: nacos-payment-provider
+  cloud:
+    nacos:
+      discovery:
+        #配置Nacos地址
+        #server-addr: localhost:8848
+        # 换成nginx的1111端口，做集群
+        server-addr: 192.168.111.144:1111
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+```
+
+####  高可用总结
+
+![img_8](.\pic\img_8.png)
 
  
 
