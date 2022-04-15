@@ -273,13 +273,72 @@ public String deal_testHotKey(String p1, String p2, BlockException exception) {
 
 ## @SentinelResource
 
+### 按资源名称限流+后续处理
+
+![img_9](.\pic\img_9.png)
+
+代码
+
+```java
+@GetMapping("/byResource")
+@SentinelResource(value = "byResource", blockHandler = "handleException")
+public CommonResult byResource() {
+    return new CommonResult(200, "按资源名称限流测试OK", new Payment(2020L, "serial001"));
+}
+
+public CommonResult handleException(BlockException exception) {
+    return new CommonResult(444, exception.getClass().getCanonicalName() + "\t 服务不可用");
+}
+```
+
+访问http://localhost:8401/byResource即可观察结果
+
+### 按照Url地址限流+后续处理
+
+![img_10](.\pic\img_10.png)
+
+代码
+
+```java
+@GetMapping("/rateLimit/byUrl")
+@SentinelResource(value = "byUrl")
+public CommonResult byUrl() {
+    return new CommonResult(200, "按url限流测试OK", new Payment(2020L, "serial002"));
+}
+```
+
+疯狂点击http://localhost:8401/rateLimit/byUrl查看結果
+
+### 存在的问题
+
+1    系统默认的，没有体现我们自己的业务要求。
+
+2  依照现有条件，我们自定义的处理方法又和业务代码耦合在一块，不直观。
+
+3  每个业务方法都添加一个兜底的，那代码膨胀加剧。
+
+4  全局统一的处理方法没有体现。
+
+### 客户自定义限流处理逻辑
+
+![img_11](.\pic\img_11.png)
+
+代码
+
+```java
+//自定义限流处理逻辑
+@GetMapping("/rateLimit/customerBlockHandler")
+@SentinelResource(value = "customerBlockHandler",
+        blockHandlerClass = CustomerBlockHandler.class,
+        blockHandler = "handlerException2")
+public CommonResult customerBlockHandler() {
+    return new CommonResult(200, "按客戶自定义", new Payment(2020L, "serial003"));
+}
+```
 
 
 
-
-
-
-
+## 服务熔断功能
 
 
 
