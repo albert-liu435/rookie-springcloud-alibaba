@@ -172,4 +172,158 @@ B惹事，A挂了
 
 ![img_5](.\pic\img_5.png)
 
-## 降级规则
+## 熔断规则
+
+[官网地址](https://github.com/alibaba/Sentinel/wiki/%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7)
+
+### 基本介绍
+
+![1650004926](.\pic\1650004926.png)
+
+RT（平均响应时间，秒级）
+      平均响应时间   超出阈值  且   在时间窗口内通过的请求>=5，两个条件同时满足后触发降级
+      窗口期过后关闭断路器
+      RT最大4900（更大的需要通过-Dcsp.sentinel.statistic.max.rt=XXXX才能生效）
+
+异常比列（秒级）
+    QPS >= 5 且异常比例（秒级统计）超过阈值时，触发降级；时间窗口结束后，关闭降级
+
+异常数（分钟级）
+     异常数（分钟统计）超过阈值时，触发降级；时间窗口结束后，关闭降级
+
+
+
+Sentinel 熔断降级会在调用链路中某个资源出现不稳定状态时（例如调用超时或异常比例升高），对这个资源的调用进行限制，
+让请求快速失败，避免影响到其它的资源而导致级联错误。
+
+当资源被降级后，在接下来的降级时间窗口之内，对该资源的调用都自动熔断（默认行为是抛出 DegradeException）。
+
+### 熔断实战
+
+#### 慢调用比例
+
+#### 异常比例
+
+#### 异常数
+
+## 热点Key限流
+
+### 基本介绍
+
+何为热点
+热点即经常访问的数据，很多时候我们希望统计或者限制某个热点数据中访问频次最高的TopN数据，并对其访问进行限流或者其它操作
+
+[官方网站](https://github.com/alibaba/Sentinel/wiki/%E7%83%AD%E7%82%B9%E5%8F%82%E6%95%B0%E9%99%90%E6%B5%81)
+
+### 注解@SentinelResource
+
+兜底方法
+分为系统默认和客户自定义，两种
+
+  之前的case，限流出问题后，都是用sentinel系统默认的提示：Blocked by Sentinel (flow limiting)
+
+  我们能不能自定?类似hystrix，某个方法出问题了，就找对应的兜底降级方法？
+
+源码：com.alibaba.csp.sentinel.slots.block.BlockException
+
+代码
+
+```java
+@GetMapping("/testHotKey")
+@SentinelResource(value = "testHotKey", blockHandler = "deal_testHotKey")
+public String testHotKey(@RequestParam(value = "p1", required = false) String p1,
+                         @RequestParam(value = "p2", required = false) String p2) {
+    //int age = 10/0;
+    return "------testHotKey";
+}
+
+public String deal_testHotKey(String p1, String p2, BlockException exception) {
+    return "------deal_testHotKey,o(╥﹏╥)o";  //sentinel系统默认的提示：Blocked by Sentinel (flow limiting)
+}
+```
+
+配置
+
+![img_6](.\pic\img_6.png)
+
+限流模式只支持QPS模式，固定写死了。（这才叫热点）
+@SentinelResource注解的方法参数索引，0代表第一个参数，1代表第二个参数，以此类推
+单机阀值以及统计窗口时长表示在此窗口时间超过阀值就限流。
+上面的抓图就是第一个参数有值的话，1秒的QPS为1，超过就限流，限流后调用dealHandler_testHotKey支持方法。
+
+启动项目，然后分别点击http://localhost:8401/testHotKey?p1=abc，http://localhost:8401/testHotKey?p1=abc&p2=33和http://localhost:8401/testHotKey?p2=abc，快速点击即可发现问题所在
+
+#### 参数例外项
+
+特例情况
+
+我们期望p1参数当它是某个特殊值时，它的限流值和平时不一样
+
+假如当p1的值等于5时，它的阈值可以达到200
+
+![img_7](.\pic\img_7.png)
+
+快速点击http://localhost:8401/testHotKey?p1=5和http://localhost:8401/testHotKey?p1=3进行测试，当p1等于5的时候，阈值变为200。当p1不等于5的时候，阈值就是平常的1。
+
+热点参数的注意点，参数必须是基本类型或者String
+
+## 系统规则
+
+![img_8](.\pic\img_8.png)
+
+## @SentinelResource
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

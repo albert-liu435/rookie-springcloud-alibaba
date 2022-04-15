@@ -1,6 +1,8 @@
 package com.rookie.bigdata.controller;
 
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,5 +53,17 @@ public class PaymentController {
         return "------testB";
     }
 
+
+    @GetMapping("/testHotKey")
+    @SentinelResource(value = "testHotKey", blockHandler = "deal_testHotKey")
+    public String testHotKey(@RequestParam(value = "p1", required = false) String p1,
+                             @RequestParam(value = "p2", required = false) String p2) {
+        //int age = 10/0;
+        return "------testHotKey";
+    }
+
+    public String deal_testHotKey(String p1, String p2, BlockException exception) {
+        return "------deal_testHotKey,o(╥﹏╥)o";  //sentinel系统默认的提示：Blocked by Sentinel (flow limiting)
+    }
 
 }
