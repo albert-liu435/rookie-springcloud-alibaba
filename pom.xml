@@ -13,6 +13,7 @@
         <module>rookie-springcloud-nacos</module>
         <module>rookie-springcloud-nacosconfig</module>
         <module>rookie-springcloud-sentinel</module>
+        <module>rookie-springcloud-sentinelribbon</module>
     </modules>
 
 
